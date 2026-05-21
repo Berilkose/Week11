@@ -29,6 +29,18 @@ class MyAppState extends ChangeNotifier {
   // uygulamanın asıl verisi bu class içinde tanımlanır ve bu veriler değiştiğinde uygulamanın güncellenmesi için notifyListeners() fonksiyonu çağrılır. 
   void getNext() {// bu fonksiyon, current değişkenini yeni bir rastgele kelime çifti ile günceller ve ardından notifyListeners() fonksiyonunu çağırarak uygulamanın güncellenmesini sağlar.
     current = WordPair.random();
+    notifyListeners();// notifyListeners() fonksiyonu, MyAppState sınıfını dinleyen widgetlere, verilerin değiştiğini bildirir ve bu widgetlerin yeniden oluşturulmasını sağlar. 
+  }
+  // Favorites listesi, kullanıcı tarafından favorilere eklenen kelime çiftlerini saklamak için kullanılır. toggleFavorite() fonksiyonu, 
+  //current değişkeninin favorites listesinde olup olmadığını kontrol eder ve buna göre ekleme veya çıkarma işlemi yapar. 
+  var favorites = <WordPair>[];
+
+  void toggleFavorite() {
+    if (favorites.contains(current)) {
+      favorites.remove(current);
+    } else {
+      favorites.add(current);
+    }
     notifyListeners();
   }
 }
@@ -39,6 +51,13 @@ class MyHomePage extends StatelessWidget { // uygulamanın ana sayfasını tanı
     var appState = context.watch<MyAppState>();
     var pair = appState.current; 
 
+    IconData icon;
+    if (appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
+
     return Scaffold(
       body: Center( // Center widgeti ile içindeki widgetler ortalanmış olur.
         child: Column( // Column widgeti, diğer widgetleri dikey olarak sıralar.
@@ -46,12 +65,26 @@ class MyHomePage extends StatelessWidget { // uygulamanın ana sayfasını tanı
           children: [
             Text('A random AWESOME idea:'), 
             BigCard(pair: pair), // text olanı ayrı bir widget olarak tanımladık, bu widgeti BigCard olarak adlandırdık ve pair değişkenini bu widgete gönderdik.
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                appState.getNext();// bu butona tıklandığında getNext() fonksiyonu çağrılır ve uygulama güncellenir.
-              },
-              child: Text('Next'),
+            SizedBox(height: 10),// SizedBox widgeti, diğer widgetler arasında belirli bir boşluk oluşturmak için kullanılır. Bu örnekte, BigCard widgeti ile ElevatedButton widgeti arasında 10 birimlik bir boşluk oluşturulur.
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [ // like butonunun icon u eklenmiş oldu.
+                ElevatedButton.icon(
+                  onPressed: () {
+                    appState.toggleFavorite();
+                  },
+                  icon: Icon(icon),
+                  label: Text('Like'),
+                ),
+
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    appState.getNext();// bu butona tıklandığında getNext() fonksiyonu çağrılır ve uygulama güncellenir.
+                  },
+                  child: Text('Next'),
+                ),
+              ],
             ),
         
           ],
