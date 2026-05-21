@@ -37,22 +37,55 @@ class MyHomePage extends StatelessWidget { // uygulamanın ana sayfasını tanı
   @override
   Widget build(BuildContext context) { // Build fonksiyonu, widget ağacını oluşturur ve günceller. 
     var appState = context.watch<MyAppState>();
+    var pair = appState.current; 
 
     return Scaffold(
-      body: Column( // Column widgeti, diğer widgetleri dikey olarak sıralar.
-        children: [
-          Text('A random AWESOME idea:'),
-          Text(appState.current.asLowerCase),
+      body: Center( // Center widgeti ile içindeki widgetler ortalanmış olur.
+        child: Column( // Column widgeti, diğer widgetleri dikey olarak sıralar.
+        mainAxisAlignment: MainAxisAlignment.center, // dikey eksen üzerinde ortalamak için kullanılır. 
+          children: [
+            Text('A random AWESOME idea:'), 
+            BigCard(pair: pair), // text olanı ayrı bir widget olarak tanımladık, bu widgeti BigCard olarak adlandırdık ve pair değişkenini bu widgete gönderdik.
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                appState.getNext();// bu butona tıklandığında getNext() fonksiyonu çağrılır ve uygulama güncellenir.
+              },
+              child: Text('Next'),
+            ),
+        
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-          // ↓ Add this.
-          ElevatedButton(
-            onPressed: () {
-              appState.getNext();// bu butona tıklandığında getNext() fonksiyonu çağrılır ve uygulama güncellenir.
-            },
-            child: Text('Next'),
-          ),
+// Bu otomatik olarak BigCard widgetini oluşturur ve pair değişkenini bu widgete gönderir. BigCard widgeti, pair değişkenini kullanarak bir metin oluşturur ve bu metni ekranda gösterir. 
+//ElevatedButton widgeti ise, kullanıcıya bir buton sağlar ve bu butona tıklandığında getNext() fonksiyonunu çağırarak uygulamanın güncellenmesini sağlar.
+class BigCard extends StatelessWidget {
+  const BigCard({
+    super.key,
+    required this.pair,
+  });
 
-        ],
+  final WordPair pair;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context); // renk seçiminde kullanılan temayı alır. Bu, uygulamanın genel görünümünü ve hissini belirler.
+    final style = theme.textTheme.displayMedium!.copyWith( // yazı stilini belirler. 
+    );
+    return Card( //Text widgetini bir Card widgeti içine yerleştirir. Card widgeti, içeriği görsel olarak vurgulamak için kullanılır ve genellikle kenarlık, gölge ve yuvarlatılmış köşeler gibi özelliklere sahiptir.
+      color: theme.colorScheme.primary,
+      child: Padding( // Padding widgeti, içindeki widgete belirli bir boşluk ekler. Bu örnekte, Text widgetine 8.0 birimlik bir boşluk eklenir.
+        padding: const EdgeInsets.all(20.0),
+        child: Text( //Burada Text widgeti, pair değişkenini kullanarak oluşturulan metni ekranda gösterir. pair.asLowerCase ifadesi, 
+        //pair değişkenindeki kelime çiftini küçük harflerle birleştirir ve bu metni Text widgetine verir. style parametresi ise, metnin görünümünü belirler.
+          pair.asLowerCase,
+          style: style,
+          semanticsLabel: "${pair.first} ${pair.second}",
+        ),
       ),
     );
   }
