@@ -45,11 +45,78 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
-class MyHomePage extends StatelessWidget { // uygulamanın ana sayfasını tanımlar, bu sayfa uygulamanın ana içeriğini gösterir.
+// artık MyHomePageState ile kendi değerlerimizi yönetebiliriz.
+class MyHomePage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) { // Build fonksiyonu, widget ağacını oluşturur ve günceller. 
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+// MyHomePage widgeti, uygulamanın ana sayfasını oluşturur. Bu widget, bir Scaffold widgeti içinde bir Row widgeti kullanarak iki ana bölüme ayrılır: NavigationRail ve GeneratorPage.
+// NavigationRail, uygulamanın sol tarafında yer alır ve kullanıcıya gezinme seçenekleri sunar. GeneratorPage ise, sağ tarafta yer alır ve kullanıcıya rastgele kelime çiftlerini gösterir.
+
+class _MyHomePageState extends State<MyHomePage> {
+var selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = GeneratorPage();
+        break;
+      case 1:
+        page = Placeholder();
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }  
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          body: Row(
+            children: [
+              SafeArea(
+                child: NavigationRail(
+                  extended: constraints.maxWidth >= 600,
+                  destinations: [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home),
+                      label: Text('Home'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.favorite),
+                      label: Text('Favorites'),
+                    ),
+                  ],
+                  // arayüzü sürekli güncellemek için kullanılıyor.
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: (value) {
+                    setState(() {
+                      selectedIndex = value;
+                    });
+                  },
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: page,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    );
+  }
+}
+
+class GeneratorPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    var pair = appState.current; 
+    var pair = appState.current;
 
     IconData icon;
     if (appState.favorites.contains(pair)) {
@@ -58,41 +125,37 @@ class MyHomePage extends StatelessWidget { // uygulamanın ana sayfasını tanı
       icon = Icons.favorite_border;
     }
 
-    return Scaffold(
-      body: Center( // Center widgeti ile içindeki widgetler ortalanmış olur.
-        child: Column( // Column widgeti, diğer widgetleri dikey olarak sıralar.
-        mainAxisAlignment: MainAxisAlignment.center, // dikey eksen üzerinde ortalamak için kullanılır. 
-          children: [
-            Text('A random AWESOME idea:'), 
-            BigCard(pair: pair), // text olanı ayrı bir widget olarak tanımladık, bu widgeti BigCard olarak adlandırdık ve pair değişkenini bu widgete gönderdik.
-            SizedBox(height: 10),// SizedBox widgeti, diğer widgetler arasında belirli bir boşluk oluşturmak için kullanılır. Bu örnekte, BigCard widgeti ile ElevatedButton widgeti arasında 10 birimlik bir boşluk oluşturulur.
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [ // like butonunun icon u eklenmiş oldu.
-                ElevatedButton.icon(
-                  onPressed: () {
-                    appState.toggleFavorite();
-                  },
-                  icon: Icon(icon),
-                  label: Text('Like'),
-                ),
-
-                SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    appState.getNext();// bu butona tıklandığında getNext() fonksiyonu çağrılır ve uygulama güncellenir.
-                  },
-                  child: Text('Next'),
-                ),
-              ],
-            ),
-        
-          ],
-        ),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          BigCard(pair: pair),
+          SizedBox(height: 10),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  appState.toggleFavorite();
+                },
+                icon: Icon(icon),
+                label: Text('Like'),
+              ),
+              SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  appState.getNext();
+                },
+                child: Text('Next'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
+
 
 // Bu otomatik olarak BigCard widgetini oluşturur ve pair değişkenini bu widgete gönderir. BigCard widgeti, pair değişkenini kullanarak bir metin oluşturur ve bu metni ekranda gösterir. 
 //ElevatedButton widgeti ise, kullanıcıya bir buton sağlar ve bu butona tıklandığında getNext() fonksiyonunu çağırarak uygulamanın güncellenmesini sağlar.
