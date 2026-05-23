@@ -1,7 +1,7 @@
 import datetime
 from django.db import models
 from django.utils import timezone
-
+from django.http import HttpResponse
 #Question ve Choice adında iki tane tablo modeli oluşturduk.
 
 class Question(models.Model):
@@ -23,3 +23,15 @@ class Choice(models.Model):
 
     def __str__(self):
         return self.choice_text
+    
+def detail(request, question_id):
+    return HttpResponse("You're looking at question %s." % question_id)
+
+
+def results(request, question_id):
+    response = "You're looking at the results of question %s."
+    return HttpResponse(response % question_id)
+
+
+def vote(request, question_id):
+    return HttpResponse("You're voting on question %s." % question_id)
